@@ -2,8 +2,12 @@ import numpy as np
 import librosa
 from scipy.ndimage import maximum_filter
 
-FAN_OUT = 10
+# peak feature filter parameters
 LEVEL_THRESHOLD_DB = 2
+NEIGHBOURHOOD_SIZE = 20
+
+# pairing filter parameters
+FAN_OUT = 10
 MIN_TIME_DELTA = 1
 MAX_TIME_DELTA = 200
 
@@ -17,7 +21,7 @@ def to_spectrogram(audio_file, sr, hop_length, window_length, n_fft):
         hop_length: int
         window_length: int
         n_fft = int
-    Returns:    
+    Returns:
         np.ndarray
     """
     y, sr = librosa.load(audio_file, sr=sr)
@@ -27,18 +31,18 @@ def to_spectrogram(audio_file, sr, hop_length, window_length, n_fft):
     return spectrogram
 
 
-def constellation(spectrogram, level_threshold=LEVEL_THRESHOLD_DB):
+def constellation(spectrogram, level_threshold=LEVEL_THRESHOLD_DB, neighbourhood_size=NEIGHBOURHOOD_SIZE):
     """
     Extract prominent peaks from spectrogram
     """
-    local_max = maximum_filter(spectrogram, mode="constant", size=20) # Set 20 as neighbourhood size
+    local_max = maximum_filter(spectrogram, mode="constant", size=neighbourhood_size)
     is_peak = (spectrogram == local_max) & (spectrogram > level_threshold)
     peaks = np.argwhere(is_peak)
 
     return peaks
 
 
-def generate_hashes(peaks):
+def generate_hashes(peaks, fan_out=FAN_OUT, min_time_delta = MIN_TIME_DELTA, max_time_delta = MAX_TIME_DELTA):
     """
     Combanatorial Hashing aka peak pairing
     """
@@ -54,11 +58,11 @@ def generate_hashes(peaks):
             f_target, t_target = peaks[j]
             delta_t = t_target - t_anchor 
 
-            if delta_t > MAX_TIME_DELTA:
+            if delta_t > max_time_delta:
                 break
             
             # Skip peaks that are too close to the anchor
-            if delta_t < MIN_TIME_DELTA:
+            if delta_t < min_time_delta:
                 continue
 
             # create hash: 32 bit unsigned int
@@ -68,12 +72,10 @@ def generate_hashes(peaks):
 
             pairs_found += 1
 
-            if pairs_found >= FAN_OUT:
+            if pairs_found >= fan_out:
                 break
     
     return hashes
-
-
     
 def find_matches(query_hashes, reference_fingerprints):
     """
