@@ -12,10 +12,21 @@ For macOS and Linux:
  source venv/bin/activate
  ```
 
+On Windows:
+
+```bash
+python3 -m venv workshopenv
+venv\Scripts\activate.bat
+```
+
 2. Install dependencies:
 
 ```bash 
 pip install -r requirements.txt
+```
+If you have issues installing the modules lined out in the requirements, try to update pip
+```bash
+python3 -m pip install --upgrade pip
 ```
 
 3. Run the main script for end to end execution using the following command in the terminal:
@@ -23,27 +34,45 @@ pip install -r requirements.txt
 ```bash
 python3 main.py
 ```
+This will run the matching query on all files in `audio_data/query` using the files in `audio_data/database` as references.
+If `fingerprint/fingerprint.pkl` does not exist, the reference fingerprints will be generated.
+
+It will output a ranking of matching reference files and scoring. 
+```
+Query song: 011298_query.mp3
+Match:
+  1. 011298.mp3  (score: 680)
+  2. 057938.mp3  (score: 3)
+  3. 013666.mp3  (score: 2)
+  4. 064006.mp3  (score: 2)
+  5. 071244.mp3  (score: 2)
+```
 
 ## Requirements:
 1. Make sure you have Python 3.12+ installed.
 
-
 ## Importing files (Input Files)
 
 The system takes .mp3 files as input for fingerprinting. Import the database recordings to the database_recordings directory.
-```bash
+```
 './audio_data/database'
 ```
 Import query files 
-```bash
+```
 './audio_data/query'
 ```
 
-## Input and Output 
+## Running the workshop notebook
+With your virtual environment activated, run on Mac:
 ```bash
-Input: query: 011298_query.mp3 
-Output: (1) 011298.mp3, (2) 094468.mp3, (3) 115471.mp3 (4) 071173.mp3 (5) 133802.mp3
+jupyter notebook notebooks/workshop.ipynb
 ```
+on Windows:
+```bash
+jupyter notebook notebooks\workshop.ipynb
+```
+
+This will open a browser page on your local host. The address is printed to the console output, e.g. `http://localhost:8888/`
 
 References: <br>
 [1] Wang, A. (2003). An industrial strength audio search algorithm. In Proceedings of the 4th International Conference on Music Information Retrieval (ISMIR 2003) (pp. 7–13) <br>
