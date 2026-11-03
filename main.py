@@ -61,10 +61,6 @@ if __name__ == "__main__":
     else:
         with open(reference_fingerprints, "rb") as f:
             song_names, ref_fingerprint_idx = pickle.load(f)
-
-    
-    # # Test
-    # print(list(fingerprint_index.items())[:10]) 
     
     # Process query audio files
     query_audio_dir = Path("./audio_data/query")
