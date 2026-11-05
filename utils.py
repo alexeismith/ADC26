@@ -141,31 +141,29 @@ def plot_match(query, reference, sr, hop_length, n_fft):
 
     to_seconds = hop_length / sr
     to_hz = sr / n_fft
-    fig, (ax_peaks, ax_hist) = plt.subplots(1, 2, figsize=(13, 4.5), gridspec_kw={'width_ratios': [2, 1]})
+    fig, (ax_peaks, ax_hist) = plt.subplots(1, 2, figsize=(12, 6))
 
     # Left: both sets of peaks, with the query slid to the winning offset
     query_times = (query_peaks[:, 1] + offset) * to_seconds
-    ax_peaks.scatter(reference_peaks[:, 1] * to_seconds, reference_peaks[:, 0] * to_hz,
-                     s=30, color='#a3a29c', label='Reference peaks')
+    ax_peaks.scatter(reference_peaks[:, 1] * to_seconds, reference_peaks[:, 0] * to_hz, color='grey', label='Reference peaks')
     ax_peaks.scatter(query_times, query_peaks[:, 0] * to_hz,
-                     s=45, marker='+', color='#2a78d6', label='Query peaks (shifted by offset)')
+                    marker='+', color='blue', label='Query peaks (shifted by offset)')
 
     for i, (h, t_anchor) in enumerate(matched):
         f_anchor, f_target, delta_t = h >> 20, (h >> 10) & 0x3FF, h & 0x3FF
         start = t_anchor + offset
         ax_peaks.plot([start * to_seconds, (start + delta_t) * to_seconds],
                       [f_anchor * to_hz, f_target * to_hz],
-                      color='#eb6834', linewidth=2, marker='o', markersize=8,
+                      color='red', marker='o', 
                       label='Matched hash pairs' if i == 0 else None)
 
     ax_peaks.set_xlim(query_times.min() - 0.5, query_times.max() + 0.5)
-    ax_peaks.set(xlabel='Time in reference (s)', ylabel='Frequency (Hz)')
-    ax_peaks.legend(loc='upper center', bbox_to_anchor=(0.5, -0.14), ncol=3, frameon=False)
+    ax_peaks.set(xlabel='Time in reference', ylabel='Frequency')
+    ax_peaks.legend(loc='upper center', bbox_to_anchor=(0.5, -0.5), ncol=3)
 
     # Right: a real match has one tall bar above the rest
-    ax_hist.bar([key[1] * to_seconds for key in counts], list(counts.values()), width=0.15, color='#2a78d6')
+    ax_hist.bar([key[1] * to_seconds for key in counts], list(counts.values()), width=0.15, color='blue')
     ax_hist.set(xlabel='Offset (s)', ylabel='Matching hashes')
     ax_hist.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    fig.tight_layout()
-    plt.show()
+    
