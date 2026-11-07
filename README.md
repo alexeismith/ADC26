@@ -3,8 +3,28 @@
 This project implements an audio fingerprinting system based on Avery Wang's algorithm for Shazam. 
 
 Both reference and query audio files are in 44.1kHz
-# Instructions: 
-1. Create a virtual environment and activate
+# Instructions:
+
+For this project, you'll need a python version > 3.12.
+You can check your version by running
+for macOS and linux:
+``` bash
+python --version
+```
+or
+``` bash
+python3 --version
+```
+
+for Windows:
+``` bash
+python -V
+```
+
+please follow [this guide](https://www.pythoncentral.io/how-to-update-python/) if you need to install python or update your python version.
+
+We don't want to mess with your favourite personal python set up, so we'll create a local environment and activate it. 
+If you have multiple python versions installed, please specify the python version which to install in the environment by replacing `python` in the command below with e.g. `python3.12`
 
 For macOS and Linux:
 ```bash
@@ -47,9 +67,6 @@ Match:
   4. 064006.mp3  (score: 2)
   5. 071244.mp3  (score: 2)
 ```
-
-## Requirements:
-1. Make sure you have Python 3.12+ installed.
 
 ## Importing files (Input Files)
 
