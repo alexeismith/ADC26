@@ -105,7 +105,7 @@ def time_diff_histogram(matches):
         counts[key] += 1
     return counts
 
-def score_and_align(counts, top_n):
+def score_and_align(counts, top_n, min_score=0):
     """
     Rank songs by their best offset count (strongest diagonal).
     """
@@ -114,6 +114,7 @@ def score_and_align(counts, top_n):
         if song_id not in best or count > best[song_id][0]:
             best[song_id] = (count, offset)
 
-    ranking = [(song_id, count, offset) for song_id, (count, offset) in best.items()]
+    ranking = [(song_id, count, offset) for song_id, (count, offset) in best.items()
+               if count >= min_score]
     ranking.sort(key=lambda r: r[1], reverse=True)
     return ranking[:top_n]
