@@ -19,7 +19,6 @@ N_FFT = 2048
 HOP_LENGTH = 1024
 TOP_N = 5
 
-
 # peak feature filter parameters
 LEVEL_THRESHOLD_DB = 2
 NEIGHBOURHOOD_SIZE = 20
@@ -29,17 +28,18 @@ FAN_OUT = 10
 MIN_TIME_DELTA = 1 # 23ms
 MAX_TIME_DELTA = 200 # ~4s
 MAX_FREQ_DELTA_HZ= 2000 #Hz
-MAX_FREQ_DELTA = round(MAX_FREQ_DELTA_HZ * N_FFT / SR)  # bins
 
 
 
-def get_peaks_and_hashes(audio_file):
-    spectrogram = to_spectrogram(audio_file=audio_file, sr=SR, hop_length=HOP_LENGTH,
-                                 window_length=WINDOW_LENGTH, n_fft=N_FFT)
+def get_peaks_and_hashes(audio_file, sr=SR, hop_length=HOP_LENGTH, 
+                         window_length=WINDOW_LENGTH, n_fft=N_FFT):
+    spectrogram = to_spectrogram(audio_file, sr, hop_length, window_length, n_fft)
     # get peaks, constellation, create_fingerprint
     peaks = constellation(spectrogram, level_threshold=LEVEL_THRESHOLD_DB, neighbourhood_size=NEIGHBOURHOOD_SIZE)
-    hashes = generate_hashes(peaks, fan_out=FAN_OUT, min_time_delta = MIN_TIME_DELTA, max_time_delta = MAX_TIME_DELTA, max_freq_delta=MAX_FREQ_DELTA)
+    max_freq_delta = round(MAX_FREQ_DELTA_HZ * n_fft / sr)   # 2000 Hz in bins for THIS n_fft
+    hashes = generate_hashes(peaks, fan_out=FAN_OUT, min_time_delta = MIN_TIME_DELTA, max_time_delta = MAX_TIME_DELTA, max_freq_delta=max_freq_delta)
     return peaks, hashes
+
 
 def process_file(audio_file):
     return get_peaks_and_hashes(audio_file)[1]
@@ -78,37 +78,50 @@ if __name__ == "__main__":
     correct_top5 = 0
     false_positive_count = 0
     false_positive_tracks = []
+    no_match_tracks = []
+
 
     for song_id, query_audio in enumerate(query_audio_files):
         query_hashes = process_file(query_audio)
         matches = find_matches(query_hashes, ref_fingerprint_idx)
         counts = time_diff_histogram(matches)
-        rank = score_and_align(counts, top_n=TOP_N)
+        rank = score_and_align(counts, top_n=TOP_N, min_score=0)
 
+     
         print(f"Query song: {query_audio.name}")
         print("Match: \n")
         for i, (ref_id, score, offset) in enumerate(rank, start=1):
             song_start = offset * HOP_LENGTH / SR
             print(f"  {i}. {song_names[ref_id]}.mp3  (score: {score}, starts at: {song_start:.2f}s) \n")
 
+        if not rank:
+                print("No match \n")
+        
         expected_song_name = query_audio.stem.replace("_query", "")
         ranked_names = [song_names[ref_id] for ref_id, _, _ in rank]
+        in_db = expected_song_name in song_names
 
-        if ranked_names[:1] == [expected_song_name]:
+        if not rank:
+            if in_db:
+                no_match_tracks.append(query_audio.name)
+            else:
+                correct_top1 += 1
+                correct_top5 += 1
+
+        elif ranked_names[0] == expected_song_name:
             correct_top1 += 1
-        elif ranked_names:
+
+        else:
             false_positive_tracks.append((query_audio.name, ranked_names[0]))
 
-        if expected_song_name in ranked_names:
-            correct_top5 += 1
 
   
 
     print(f"Top-1: {correct_top1}/{len(query_audio_files)}")
     print(f"Top-5: {correct_top5}/{len(query_audio_files)}")
     print(f"Accuracy: {correct_top1 / len(query_audio_files) * 100:.2f}%")
-    # print(f"False positive: {len(false_positive_tracks)}/{len(query_audio_files)}")
-    # print("False positive tracks:")
-    # for query_name, returned_song in false_positive_tracks:
-    #     print(f"  - {query_name} returned {returned_song}.mp3")
+    print(f"False positive: {len(false_positive_tracks)}/{len(query_audio_files)}")
+    print("False positive tracks:")
+    for query_name, returned_song in false_positive_tracks:
+        print(f"  - {query_name} returned {returned_song}.mp3")
 

@@ -16,7 +16,7 @@ On Windows:
 
 ```bash
 python3 -m venv workshopenv
-venv\Scripts\activate.bat
+workshopenv\Scripts\activate.bat
 ```
 
 2. Install dependencies:
@@ -35,7 +35,7 @@ python3 -m pip install --upgrade pip
 python3 main.py
 ```
 This will run the matching query on all files in `audio_data/query` using the files in `audio_data/database` as references.
-If `fingerprint/fingerprint.pkl` does not exist, the reference fingerprints will be generated.
+If `audio_fingerprint_datafingerprint/fingerprint.pkl` does not exist, the reference fingerprints will be generated.
 
 It will output a ranking of matching reference files and scoring. 
 ```
