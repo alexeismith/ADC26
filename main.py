@@ -76,7 +76,6 @@ if __name__ == "__main__":
 
     correct_top1 = 0
     correct_top5 = 0
-    false_positive_count = 0
     false_positive_tracks = []
     no_match_tracks = []
 
@@ -114,7 +113,8 @@ if __name__ == "__main__":
         else:
             false_positive_tracks.append((query_audio.name, ranked_names[0]))
 
-
+        if expected_song_name in ranked_names: correct_top5 += 1
+        
   
 
     print(f"Top-1: {correct_top1}/{len(query_audio_files)}")
@@ -124,4 +124,8 @@ if __name__ == "__main__":
     print("False positive tracks:")
     for query_name, returned_song in false_positive_tracks:
         print(f"  - {query_name} returned {returned_song}.mp3")
+        
+    print(f"No match (song in DB): {len(no_match_tracks)}/{len(query_audio_files)}")
+    for query_name in no_match_tracks:
+        print(f"  - {query_name}")
 
