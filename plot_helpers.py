@@ -113,7 +113,7 @@ def plot_histogram(x_values, counts):
     ax.set_ylabel("Counts")
     ax.get_yaxis().set_major_formatter(ticker.FormatStrFormatter('%d'))
 
-def plot_time_deltas(delta_reference, delta_query):
+def plot_anchor_times(delta_reference, delta_query):
     fig, ax = plt.subplots(1, figsize=(8,8))
     ax.scatter(delta_reference, delta_query)
     ax.set_xlabel("t⚓ reference")
