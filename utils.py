@@ -69,8 +69,16 @@ def generate_hashes(peaks, fan_out, min_time_delta, max_time_delta, max_freq_del
             if abs(int(f_target) - int(f_anchor)) > max_freq_delta:
                 continue
 
+            # Find ratio of anchor to target frequency
+            f_relative = f_anchor / f_target
+            # Encode float to int
+            # 6 significant figures fits into 20 bits safely
+            f_relative_encoded = int(round(f_relative * 10_000))
+            f_relative_encoded_masked = int(f_relative_encoded & 0xFFFFF)
+            assert(f_relative_encoded == f_relative_encoded_masked) # Check the encoding did not lose information
+
             # create hash: 32 bit unsigned int
-            hash_val = (int(f_anchor & 0x3FF) << 20) | (int(f_target & 0x3FF) << 10) | int(delta_t & 0x3FF)
+            hash_val = (f_relative_encoded_masked << 10) | int(delta_t & 0x3FF)
             hash_val_32 = np.uint32(hash_val)
             hashes.append((int(hash_val_32), int(t_anchor)))
 
