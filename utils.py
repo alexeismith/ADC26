@@ -70,7 +70,7 @@ def generate_hashes(peaks, fan_out, min_time_delta, max_time_delta, max_freq_del
                 continue
 
             # Find ratio of anchor to target frequency
-            f_relative = f_anchor / f_target
+            f_relative = f_anchor / max(f_target, 1)
             # Encode float to int
             # 6 significant figures fits into 20 bits safely
             f_relative_encoded = int(round(f_relative * 10_000))
